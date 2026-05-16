@@ -194,10 +194,10 @@ Se houver mais de um risco, classifique pelo mais grave.
 """
 
 MOCK_REPORT_RAW = {
-    "categoria": "seguro",
-    "nivel":     "baixo",
-    "descricao": "Conteúdo adequado para a faixa etária — nenhum risco detectado (mock)",
-    "confianca": 0.95,
+    "categoria": "grooming",
+    "nivel":     "alto",
+    "descricao": "Adulto solicitando contato externo detectado no chat do jogo (mock de teste).",
+    "confianca": 0.91,
 }
 
 RECOMMENDATIONS_PROMPT = """

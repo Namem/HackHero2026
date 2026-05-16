@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura — Cada tela em todas as paletas</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f7;
+      color: #111827;
+      padding: 32px 24px 60px;
+      min-height: 100vh;
+    }
+    .gallery-head {
+      max-width: 1500px; margin: 0 auto 40px;
+      text-align: center;
+    }
+    .gallery-head h1 {
+      font-size: 32px; font-weight: 800; letter-spacing: -1px;
+      color: #2d0022;
+    }
+    .gallery-head p {
+      font-size: 14px; color: #6b7280; margin-top: 6px;
+      max-width: 680px; margin-left: auto; margin-right: auto; line-height: 1.5;
+    }
+    .palette-legend {
+      max-width: 1500px; margin: 0 auto 28px;
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      padding: 16px;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #f3f4f6;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .legend-swatch {
+      display: flex; border-radius: 6px; overflow: hidden;
+      width: 44px; height: 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .legend-swatch > div { flex: 1; }
+    .legend-name {
+      font-size: 12px; font-weight: 700; color: #111827;
+    }
+    .screen-row {
+      max-width: 1500px; margin: 0 auto 40px;
+      padding: 24px 24px 28px;
+      background: #fff;
+      border-radius: 18px;
+      border: 1px solid #f3f4f6;
+    }
+    .screen-row-head {
+      display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px;
+      padding-bottom: 14px; border-bottom: 1px solid #f3f4f6;
+    }
+    .screen-num {
+      font-size: 12px; font-weight: 800; color: #9ca3af;
+      letter-spacing: 0.8px; text-transform: uppercase;
+    }
+    .screen-title {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+      color: #2d0022;
+    }
+    .screen-desc {
+      font-size: 13px; color: #6b7280; margin-left: auto;
+    }
+    .palette-cols {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+    .palette-col {
+      display: flex; flex-direction: column;
+    }
+    .palette-tag {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #f3f4f6;
+    }
+    .palette-tag-swatch {
+      display: flex; border-radius: 4px; overflow: hidden;
+      width: 32px; height: 16px;
+      flex-shrink: 0;
+    }
+    .palette-tag-swatch > div { flex: 1; }
+    .palette-tag-name {
+      font-size: 11px; font-weight: 700; color: #374151;
+      letter-spacing: 0.1px;
+    }
+    .screen-frame {
+      width: 100%; aspect-ratio: 420 / 900;
+      border-radius: 18px; overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+      background: #f3f4f6;
+      position: relative;
+    }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="gallery-head">
+    <h1>✦ Aura · Cada tela em todas as paletas</h1>
+    <p>Compare como cada uma das 5 paletas de pitaya fica em cada uma das telas principais.</p>
+  </div>
+
+  <div id="legend"></div>
+  <div id="root"></div>
+
+  <script type="text/babel" src="components/shared.jsx"></script>
+  <script type="text/babel" src="components/LoginScreen.jsx"></script>
+  <script type="text/babel" src="components/HomeScreen.jsx"></script>
+  <script type="text/babel" src="components/AlertsScreen.jsx"></script>
+  <script type="text/babel" src="components/ApiDocsScreen.jsx"></script>
+  <script type="text/babel" src="components/TransparencyScreens.jsx"></script>
+
+  <script type="text/babel">
+    function ScreenScale({ children }) {
+      const ref = React.useRef(null);
+      const [scale, setScale] = React.useState(1);
+      React.useEffect(() => {
+        function update() {
+          if (!ref.current) return;
+          const w = ref.current.parentElement.offsetWidth;
+          setScale(w / 420);
+        }
+        update();
+        const ro = new ResizeObserver(update);
+        if (ref.current) ro.observe(ref.current.parentElement);
+        window.addEventListener('resize', update);
+        return () => { ro.disconnect(); window.removeEventListener('resize', update); };
+      }, []);
+      return (
+        <div ref={ref} style={{
+          width: 420, height: 900,
+          transform: `scale(${scale})`, transformOrigin: 'top left',
+        }}>
+          {children}
+        </div>
+      );
+    }
+
+    function PaletteCol({ themeKey, children }) {
+      const theme = AURA_THEMES[themeKey];
+      return (
+        <div className="palette-col">
+          <div className="palette-tag">
+            <div className="palette-tag-swatch">
+              {theme.swatch.map((c, i) => <div key={i} style={{ background: c }} />)}
+            </div>
+            <span className="palette-tag-name">{theme.label}</span>
+          </div>
+          <div className="screen-frame">
+            <ScreenScale>{children}</ScreenScale>
+          </div>
+        </div>
+      );
+    }
+
+    const SCREENS = [
+      { num: '01', title: 'Login',                       desc: 'Autenticação · aviso ECA Digital',         render: (t) => <LoginScreen tweaks={t} /> },
+      { num: '02', title: 'Home — Dispositivos',         desc: 'Hero + cards dos filhos',                  render: (t) => <HomeScreen tweaks={t} /> },
+      { num: '03', title: 'Alertas · Detalhe (drawer)',  desc: 'O que detectado · pode ser · entenda',     render: (t) => <AlertsScreenDrawer tweaks={t} /> },
+      { num: '03', title: 'Alertas · Timeline',          desc: 'Variação cronológica vertical',            render: (t) => <AlertsScreenTimeline tweaks={t} /> },
+      { num: '03', title: 'Alertas · Estado vazio',      desc: '"Tudo sob proteção"',                      render: (t) => <AlertsScreenEmpty tweaks={t} /> },
+      { num: '04', title: 'Ciência da criança',          desc: 'POV criança · tela de transparência',      render: (t) => <ConsentScreen tweaks={t} /> },
+      { num: '04', title: 'Notificação educativa',       desc: 'Lockscreen do pai · tom informativo',      render: (t) => <PushNotificationScreen tweaks={t} /> },
+      { num: '05', title: 'API Docs',                    desc: 'Endpoints expansíveis',                    render: (t) => <ApiDocsScreen tweaks={t} /> },
+    ];
+
+    const themeKeys = Object.keys(AURA_THEMES);
+
+    function Legend() {
+      return (
+        <div className="palette-legend">
+          {themeKeys.map((k) => {
+            const t = AURA_THEMES[k];
+            return (
+              <div key={k} className="legend-item">
+                <div className="legend-swatch">
+                  {t.swatch.map((c, i) => <div key={i} style={{ background: c }} />)}
+                </div>
+                <span className="legend-name">{t.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function App() {
+      return (
+        <>
+          {SCREENS.map((s, i) => (
+            <div key={i} className="screen-row">
+              <div className="screen-row-head">
+                <div>
+                  <div className="screen-num">{s.num}</div>
+                  <div className="screen-title">{s.title}</div>
+                </div>
+                <div className="screen-desc">{s.desc}</div>
+              </div>
+              <div className="palette-cols">
+                {themeKeys.map((k) => (
+                  <PaletteCol key={k} themeKey={k}>
+                    {s.render({ theme: k, gradient: 'medium', density: 'comfortable', alertsState: 'full' })}
+                  </PaletteCol>
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('legend')).render(<Legend />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
