@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura — Hackathon HackerHero 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    /* Canvas backdrop tinted toward Pitaya */
+    #root { width: 100vw; height: 100vh; background: #f5f5f7; }
+
+    /* Section subtitle styling override for design_canvas */
+    .aura-info {
+      max-width: 720px;
+      margin: 0 auto 24px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid #f3e8ff;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+    .aura-info strong { color: #2d0022; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="components/shared.jsx"></script>
+  <script type="text/babel" src="components/LoginScreen.jsx"></script>
+  <script type="text/babel" src="components/HomeScreen.jsx"></script>
+  <script type="text/babel" src="components/AlertsScreen.jsx"></script>
+  <script type="text/babel" src="components/ApiDocsScreen.jsx"></script>
+  <script type="text/babel" src="components/TransparencyScreens.jsx"></script>
+
+  <script type="text/babel">
+    const AURA_TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "theme": "pitaya",
+      "gradient": "medium",
+      "density": "comfortable",
+      "alertsState": "full"
+    }/*EDITMODE-END*/;
+
+    function App() {
+      const [t, setTweak] = useTweaks(AURA_TWEAK_DEFAULTS);
+      const tweaks = t;
+
+      return (
+        <>
+          <DesignCanvas>
+            <DCSection id="login" title="01 · Login" subtitle="Tela de autenticação · aviso ECA Digital em destaque · gradiente dark Pitaya">
+              <DCArtboard id="login-default" label="Login · Pitaya" width={420} height={900}>
+                <LoginScreen tweaks={tweaks} />
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="home" title="02 · Home — Dispositivos" subtitle="Banner hero + cards dos filhos. Duas variantes de hero.">
+              <DCArtboard id="home-default" label="Hero clássico" width={420} height={900}>
+                <HomeScreen tweaks={tweaks} />
+              </DCArtboard>
+              <DCArtboard id="home-stats" label="Hero com stats" width={420} height={900}>
+                <HomeScreenStats tweaks={tweaks} />
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="alerts" title="03 · Alertas (tela principal)" subtitle="Padrão: colapsáveis com Alto aberto. 4 variações: drawer · inline (spec) · timeline · vazio.">
+              <DCArtboard id="alerts-default" label="Colapsáveis · padrão" width={420} height={900}>
+                <AlertsScreen tweaks={tweaks} />
+              </DCArtboard>
+              <DCArtboard id="alerts-drawer" label="Drawer aberto (recomendado)" width={420} height={900}>
+                <AlertsScreenDrawer tweaks={tweaks} />
+              </DCArtboard>
+              <DCArtboard id="alerts-inline" label="Inline expandido (spec)" width={420} height={900}>
+                <AlertsScreenInline tweaks={tweaks} />
+              </DCArtboard>
+              <DCArtboard id="alerts-timeline" label="Timeline vertical" width={420} height={900}>
+                <AlertsScreenTimeline tweaks={tweaks} />
+              </DCArtboard>
+              <DCArtboard id="alerts-empty" label="Estado vazio" width={420} height={900}>
+                <AlertsScreenEmpty tweaks={tweaks} />
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="transparency" title="04 · Transparência com a criança" subtitle="O Aura é visível e explica-se ao menor — ECA Digital Art. 19 §1º. A IA classifica sozinha; pais não configuram filtros.">
+              <DCArtboard id="consent" label="Ciência do menor (POV criança)" width={420} height={900}>
+                <ConsentScreen tweaks={tweaks} />
+              </DCArtboard>
+              <DCArtboard id="game-overlay" label="Ícone visível no jogo" width={420} height={900}>
+                <GameOverlayScreen tweaks={tweaks} />
+              </DCArtboard>
+              <DCArtboard id="push" label="Notificação educativa (pai)" width={420} height={900}>
+                <PushNotificationScreen tweaks={tweaks} />
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="api" title="05 · API Docs" subtitle="Endpoints expansíveis · método colorido · response em dark code block.">
+              <DCArtboard id="api-default" label="API Docs" width={420} height={900}>
+                <ApiDocsScreen tweaks={tweaks} />
+              </DCArtboard>
+            </DCSection>
+          </DesignCanvas>
+
+          <TweaksPanel title="Tweaks · Aura">
+            <TweakSection label="Paleta · variedades de pitaya" />
+            <TweakColor
+              label="Tema"
+              value={AURA_THEMES[tweaks.theme]?.swatch || AURA_THEMES.pitaya.swatch}
+              options={Object.values(AURA_THEMES).map(t => t.swatch)}
+              onChange={(swatch) => {
+                const entry = Object.entries(AURA_THEMES).find(([, t]) => t.swatch.join(',') === swatch.join(','));
+                if (entry) setTweak('theme', entry[0]);
+              }}
+            />
+            <div style={{
+              fontSize: 10.5, color: '#9ca3af', padding: '2px 14px 8px',
+              fontStyle: 'italic',
+            }}>
+              {AURA_THEMES[tweaks.theme]?.label || 'Pitaya Vermelha'}
+            </div>
+
+            <TweakSection label="Visual" />
+            <TweakRadio
+              label="Gradiente"
+              value={tweaks.gradient}
+              options={[
+                { label: 'Sutil', value: 'subtle' },
+                { label: 'Médio', value: 'medium' },
+                { label: 'Dramático', value: 'dramatic' },
+              ]}
+              onChange={(v) => setTweak('gradient', v)}
+            />
+            <TweakRadio
+              label="Densidade"
+              value={tweaks.density}
+              options={[
+                { label: 'Confortável', value: 'comfortable' },
+                { label: 'Compacta', value: 'compact' },
+              ]}
+              onChange={(v) => setTweak('density', v)}
+            />
+
+            <TweakSection label="Demo · Alertas" />
+            <TweakSelect
+              label="Estado dos dados"
+              value={tweaks.alertsState}
+              options={[
+                { label: 'Cheio (6 alertas)', value: 'full' },
+                { label: 'Poucos (2 alertas)', value: 'few' },
+                { label: 'Vazio', value: 'empty' },
+              ]}
+              onChange={(v) => setTweak('alertsState', v)}
+            />
+          </TweaksPanel>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
