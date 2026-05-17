@@ -7,18 +7,16 @@ services:
     image: postgres:16-alpine
     container_name: aura-db
     restart: unless-stopped
+    # env_file injeta POSTGRES_USER/PASSWORD/DB direto no container - Postgres le isso na inicializacao
     env_file: ./backend/.env.production
-    environment:
-      POSTGRES_USER: ${DB_USER:-aura}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-aura}
-      POSTGRES_DB: ${DB_NAME:-aura}
     volumes:
       - aura_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-aura}"]
+      # $$ escapa para o shell do container expandir POSTGRES_USER
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
     # Sem 'ports' - so acessivel internamente entre containers
 
   api:
