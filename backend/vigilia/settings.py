@@ -8,7 +8,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-insecure-key-change-in-prod")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
-ALLOWED_HOSTS = ["*"]
+
+# ALLOWED_HOSTS via env: "host1,host2,host3". Default "*" para dev.
+_allowed = os.environ.get("ALLOWED_HOSTS", "*")
+ALLOWED_HOSTS = [h.strip() for h in _allowed.split(",") if h.strip()]
+
+# CSRF Trusted Origins (necessario para Django 4+ atras de proxy com HTTPS)
+_csrf = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf.split(",") if o.strip()]
+
+# Atras de nginx com SSL terminado, confiar no header X-Forwarded-Proto
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -28,6 +39,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise serve arquivos estaticos sem precisar de nginx para isso
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -79,6 +92,12 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {

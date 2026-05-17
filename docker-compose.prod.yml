@@ -1,0 +1,45 @@
+# Aura - producao
+# Subir: docker compose -f docker-compose.prod.yml up -d --build
+# As portas 80/443 NAO sao expostas aqui - o nginx do host faz proxy para 127.0.0.1:8001
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: aura-db
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    environment:
+      POSTGRES_USER: ${DB_USER:-aura}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aura}
+      POSTGRES_DB: ${DB_NAME:-aura}
+    volumes:
+      - aura_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-aura}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Sem 'ports' - so acessivel internamente entre containers
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aura-api
+    restart: unless-stopped
+    env_file: ./backend/.env.production
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Expoe SO PARA O HOST (127.0.0.1) - nginx do host faz proxy_pass para ca
+      - "127.0.0.1:8001:8000"
+    volumes:
+      - aura_static:/app/staticfiles
+      - aura_media:/app/media
+    entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
+
+volumes:
+  aura_pg_data:
+  aura_static:
+  aura_media:
