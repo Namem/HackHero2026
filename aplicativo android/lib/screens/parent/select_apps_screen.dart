@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_theme.dart';
@@ -26,9 +27,7 @@ class _SelectAppsScreenState extends State<SelectAppsScreen> {
   Future<void> _load() async {
     final link = context.read<LinkProvider>();
     await link.restoreLinkedChild();
-    if (link.linkedChildId != null) {
-      await context.read<AppsProvider>().loadApps(link.linkedChildId!);
-    }
+    await context.read<AppsProvider>().loadApps(link.linkedChildId ?? 0);
   }
 
   Future<void> _save() async {
@@ -102,10 +101,15 @@ class _SelectAppsScreenState extends State<SelectAppsScreen> {
                   onChanged: (_) => apps.toggleApp(idx),
                   title: Text(app.appName),
                   subtitle: Text(app.packageName, style: const TextStyle(fontSize: 11)),
-                  secondary: CircleAvatar(
-                    backgroundColor: AppTheme.primary.withOpacity(0.1),
-                    child: Text(app.appName[0], style: TextStyle(color: AppTheme.primary)),
-                  ),
+                  secondary: app.iconBase64 != null && app.iconBase64!.isNotEmpty
+                      ? CircleAvatar(
+                          backgroundImage: MemoryImage(base64Decode(app.iconBase64!)),
+                          backgroundColor: Colors.transparent,
+                        )
+                      : CircleAvatar(
+                          backgroundColor: AppTheme.primary.withOpacity(0.1),
+                          child: Text(app.appName[0], style: TextStyle(color: AppTheme.primary)),
+                        ),
                   activeColor: AppTheme.primary,
                 );
               },

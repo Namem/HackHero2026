@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,11 +56,16 @@ class _ChildAppsListScreenState extends State<ChildAppsListScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: AppTheme.primary.withOpacity(0.1),
-                          child: Text(app.appName[0],
-                              style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
-                        ),
+                        leading: app.iconBase64 != null && app.iconBase64!.isNotEmpty
+                            ? CircleAvatar(
+                                backgroundImage: MemoryImage(base64Decode(app.iconBase64!)),
+                                backgroundColor: Colors.transparent,
+                              )
+                            : CircleAvatar(
+                                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                                child: Text(app.appName[0],
+                                    style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                              ),
                         title: Text(app.appName, style: const TextStyle(fontWeight: FontWeight.w600)),
                         subtitle: const Text('Monitorado pelo seu responsável',
                             style: TextStyle(fontSize: 12)),

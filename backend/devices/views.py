@@ -47,15 +47,18 @@ class MonitoredAppView(APIView):
 
     def post(self, request, device_token):
         device = self._get_device(request, device_token)
-        # Bulk sync: accepts {"apps": [{"package_name": "...", "app_name": "..."}]}
+        # Bulk sync: accepts {"apps": [{"package_name": "...", "app_name": "...", "icon": "..."}]}
         if "apps" in request.data:
             apps_list = request.data["apps"]
+            # Clear old apps and replace with fresh scan
+            device.monitored_apps.all().delete()
             created = []
             for app_data in apps_list:
-                obj, _ = MonitoredApp.objects.get_or_create(
+                obj = MonitoredApp.objects.create(
                     device=device,
                     package_name=app_data["package_name"],
-                    defaults={"app_name": app_data.get("app_name", app_data["package_name"])},
+                    app_name=app_data.get("app_name", app_data["package_name"]),
+                    icon_base64=app_data.get("icon", ""),
                 )
                 created.append(obj)
             return Response(

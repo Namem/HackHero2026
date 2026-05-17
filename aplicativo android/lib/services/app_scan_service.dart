@@ -1,11 +1,24 @@
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/installed_app.dart';
 import 'api_service.dart';
 
 class AppScanService {
-  static Future<void> syncApps(List<Map<String, String>> apps) async {
+  static const _channel = MethodChannel('com.vigilia/apps');
+
+  static Future<List<Map<String, dynamic>>> scanRealApps() async {
+    try {
+      final List<dynamic> result = await _channel.invokeMethod('getInstalledApps');
+      return result.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<void> syncApps(List<Map<String, dynamic>> apps) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('device_token') ?? '';
+    if (token.isEmpty) return;
     await ApiService.post('/devices/$token/apps/', {'apps': apps});
   }
 
@@ -15,13 +28,14 @@ class AppScanService {
   }
 
   static Future<List<InstalledApp>> getAppsForDevice(String deviceToken) async {
-    if (deviceToken.isEmpty) return getMockApps();
+    if (deviceToken.isEmpty) return [];
     try {
       final list = await ApiService.getList('/devices/$deviceToken/apps/');
       return list.map((e) => InstalledApp(
         id: e['id'] ?? 0,
         packageName: e['package_name'] ?? '',
         appName: e['app_name'] ?? e['package_name'] ?? '',
+        iconBase64: e['icon_base64'],
         isMonitored: e['is_active'] ?? true,
       )).toList();
     } catch (_) {
@@ -30,7 +44,6 @@ class AppScanService {
   }
 
   static Future<List<InstalledApp>> getApps(int childId) async {
-    // For parent: try to get child's device token from backend
     try {
       final devices = await getChildDevices();
       if (devices.isNotEmpty) {
@@ -42,24 +55,9 @@ class AppScanService {
         }
       }
     } catch (_) {}
-    // Fallback: try local device_token (child device)
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('device_token') ?? '';
     if (token.isNotEmpty) return getAppsForDevice(token);
-    return getMockApps();
+    return [];
   }
-
-  // Apps realistas para a demo quando backend não tem dados
-  static List<InstalledApp> getMockApps() => [
-        const InstalledApp(id: 1, packageName: 'com.whatsapp', appName: 'WhatsApp', isMonitored: true),
-        const InstalledApp(id: 2, packageName: 'com.google.android.youtube', appName: 'YouTube', isMonitored: false),
-        const InstalledApp(id: 3, packageName: 'com.instagram.android', appName: 'Instagram', isMonitored: true),
-        const InstalledApp(id: 4, packageName: 'com.android.chrome', appName: 'Chrome', isMonitored: false),
-        const InstalledApp(id: 5, packageName: 'com.dts.freefireth', appName: 'Free Fire', isMonitored: true),
-        const InstalledApp(id: 6, packageName: 'com.zhiliaoapp.musically', appName: 'TikTok', isMonitored: true),
-        const InstalledApp(id: 7, packageName: 'com.spotify.music', appName: 'Spotify', isMonitored: false),
-        const InstalledApp(id: 8, packageName: 'com.discord', appName: 'Discord', isMonitored: false),
-        const InstalledApp(id: 9, packageName: 'com.supercell.brawlstars', appName: 'Brawl Stars', isMonitored: false),
-        const InstalledApp(id: 10, packageName: 'com.roblox.client', appName: 'Roblox', isMonitored: true),
-      ];
 }

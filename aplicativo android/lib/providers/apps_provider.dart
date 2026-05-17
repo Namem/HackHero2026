@@ -28,15 +28,6 @@ class AppsProvider extends ChangeNotifier {
       }
     } catch (e) {
       _error = e.toString();
-      // Fallback mock se o backend ainda não estiver pronto
-      _apps = [
-        const InstalledApp(id: 1, packageName: 'com.whatsapp', appName: 'WhatsApp', isMonitored: true),
-        const InstalledApp(id: 2, packageName: 'com.google.android.youtube', appName: 'YouTube', isMonitored: false),
-        const InstalledApp(id: 3, packageName: 'com.instagram.android', appName: 'Instagram', isMonitored: true),
-        const InstalledApp(id: 4, packageName: 'com.android.chrome', appName: 'Chrome', isMonitored: false),
-        const InstalledApp(id: 5, packageName: 'com.dts.freefireth', appName: 'Free Fire', isMonitored: true),
-      ];
-      _error = null;
     } finally {
       _loading = false;
       notifyListeners();

@@ -14,7 +14,9 @@ class ParentGenerateCodeScreen extends StatefulWidget {
 
 class _ParentGenerateCodeScreenState extends State<ParentGenerateCodeScreen> {
   Timer? _timer;
+  Timer? _statusPoll;
   int _secondsLeft = 600; // 10 minutos
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -25,6 +27,7 @@ class _ParentGenerateCodeScreenState extends State<ParentGenerateCodeScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _statusPoll?.cancel();
     super.dispose();
   }
 
@@ -32,6 +35,7 @@ class _ParentGenerateCodeScreenState extends State<ParentGenerateCodeScreen> {
     final link = context.read<LinkProvider>();
     await link.generateCode();
     _startTimer();
+    _startStatusPolling();
   }
 
   void _startTimer() {
@@ -44,6 +48,51 @@ class _ParentGenerateCodeScreenState extends State<ParentGenerateCodeScreen> {
         setState(() => _secondsLeft--);
       }
     });
+  }
+
+  void _startStatusPolling() {
+    _statusPoll?.cancel();
+    _statusPoll = Timer.periodic(const Duration(seconds: 3), (t) async {
+      if (!mounted || _navigated) {
+        t.cancel();
+        return;
+      }
+      final link = context.read<LinkProvider>();
+      await link.checkStatus();
+      if (link.linked && !_navigated && mounted) {
+        _navigated = true;
+        t.cancel();
+        _timer?.cancel();
+        await _showPairedDialog(link.partnerName);
+      }
+    });
+  }
+
+  Future<void> _showPairedDialog(String? partnerName) async {
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        icon: Icon(Icons.check_circle, color: AppTheme.primary, size: 56),
+        title: const Text('Vinculado com sucesso!'),
+        content: Text(
+          partnerName != null
+              ? 'O celular de $partnerName foi vinculado ao seu app.'
+              : 'O celular do seu filho foi vinculado.',
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushReplacementNamed(context, Routes.parentHome);
+            },
+            child: const Text('Ir para o painel'),
+          ),
+        ],
+      ),
+    );
   }
 
   String get _timerText {

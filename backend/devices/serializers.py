@@ -5,7 +5,7 @@ from devices.models import Device, MonitoredApp
 class MonitoredAppSerializer(serializers.ModelSerializer):
     class Meta:
         model = MonitoredApp
-        fields = ["id", "package_name", "app_name", "is_active"]
+        fields = ["id", "package_name", "app_name", "icon_base64", "is_active"]
 
 
 class DeviceSerializer(serializers.ModelSerializer):

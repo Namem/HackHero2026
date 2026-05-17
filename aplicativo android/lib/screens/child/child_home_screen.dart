@@ -4,6 +4,7 @@ import '../../config/app_theme.dart';
 import '../../config/routes.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/link_provider.dart';
+import '../../services/app_scan_service.dart';
 
 class ChildHomeScreen extends StatefulWidget {
   const ChildHomeScreen({super.key});
@@ -18,7 +19,15 @@ class _ChildHomeScreenState extends State<ChildHomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LinkProvider>().checkStatus();
+      _syncApps();
     });
+  }
+
+  Future<void> _syncApps() async {
+    try {
+      final appsData = await AppScanService.scanRealApps();
+      await AppScanService.syncApps(appsData);
+    } catch (_) {}
   }
 
   @override

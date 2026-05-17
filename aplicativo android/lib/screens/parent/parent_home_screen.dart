@@ -32,11 +32,11 @@ class _ParentHomeScreenState extends State<ParentHomeScreen> {
   Future<void> _load() async {
     final link = context.read<LinkProvider>();
     await link.restoreLinkedChild();
+    await link.checkStatus();
     await context.read<AlertsProvider>().load();
     await context.read<TriggersProvider>().load();
-    if (link.linkedChildId != null) {
-      await context.read<AppsProvider>().loadApps(link.linkedChildId!);
-    }
+    // Always load apps — getApps tries /devices/children/ to find the child device
+    await context.read<AppsProvider>().loadApps(link.linkedChildId ?? 0);
   }
 
   @override

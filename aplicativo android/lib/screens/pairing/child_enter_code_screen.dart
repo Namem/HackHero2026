@@ -33,12 +33,9 @@ class _ChildEnterCodeScreenState extends State<ChildEnterCodeScreen> {
     final ok = await link.pairWithCode(code);
     if (!mounted) return;
     if (ok) {
-      // Sync installed apps to backend so parent can see them
-      final mockApps = AppScanService.getMockApps();
-      final appsData = mockApps
-          .map((a) => <String, String>{'package_name': a.packageName, 'app_name': a.appName})
-          .toList();
+      // Sync real installed apps to backend so parent can see them
       try {
+        final appsData = await AppScanService.scanRealApps();
         await AppScanService.syncApps(appsData);
       } catch (_) {}
       if (!mounted) return;

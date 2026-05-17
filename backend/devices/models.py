@@ -17,6 +17,7 @@ class MonitoredApp(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="monitored_apps")
     package_name = models.CharField(max_length=255)
     app_name = models.CharField(max_length=255)
+    icon_base64 = models.TextField(blank=True, default="")
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

@@ -17,7 +17,7 @@ class LinkProvider extends ChangeNotifier {
   bool get linked => _linked;
   String? get partnerName => _partnerName;
   int? get partnerId => _partnerId;
-  int? get linkedChildId => _role == 'parent' ? _partnerId : null;
+  int? get linkedChildId => _linked ? _partnerId : null;
   bool get loading => _loading;
   String? get error => _error;
 
