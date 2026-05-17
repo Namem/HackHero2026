@@ -47,24 +47,53 @@ class MonitoredAppView(APIView):
 
     def post(self, request, device_token):
         device = self._get_device(request, device_token)
-        # Bulk sync: accepts {"apps": [{"package_name": "...", "app_name": "...", "icon": "..."}]}
+
+        # Parent flow: toggle is_active de apps existentes
+        # Accepts {"app_ids": [1, 2, 3]} — IDs marcados como monitorados
+        if "app_ids" in request.data:
+            app_ids = request.data.get("app_ids") or []
+            qs = device.monitored_apps.all()
+            qs.filter(id__in=app_ids).update(is_active=True)
+            qs.exclude(id__in=app_ids).update(is_active=False)
+            return Response(
+                MonitoredAppSerializer(device.monitored_apps.all(), many=True).data,
+                status=status.HTTP_200_OK,
+            )
+
+        # Child flow: bulk sync da lista de apps instalados
+        # Accepts {"apps": [{"package_name": "...", "app_name": "...", "icon": "..."}]}
         if "apps" in request.data:
             apps_list = request.data["apps"]
-            # Clear old apps and replace with fresh scan
-            device.monitored_apps.all().delete()
-            created = []
+            existing = {a.package_name: a for a in device.monitored_apps.all()}
+            seen_packages = set()
+            result = []
             for app_data in apps_list:
-                obj = MonitoredApp.objects.create(
-                    device=device,
-                    package_name=app_data["package_name"],
-                    app_name=app_data.get("app_name", app_data["package_name"]),
-                    icon_base64=app_data.get("icon", ""),
-                )
-                created.append(obj)
+                pkg = app_data["package_name"]
+                seen_packages.add(pkg)
+                if pkg in existing:
+                    # Atualiza metadados mantendo is_active e o ID
+                    obj = existing[pkg]
+                    obj.app_name = app_data.get("app_name", pkg)
+                    icon = app_data.get("icon", "")
+                    if icon:
+                        obj.icon_base64 = icon
+                    obj.save()
+                else:
+                    obj = MonitoredApp.objects.create(
+                        device=device,
+                        package_name=pkg,
+                        app_name=app_data.get("app_name", pkg),
+                        icon_base64=app_data.get("icon", ""),
+                        is_active=False,  # padrão: não monitora até pai escolher
+                    )
+                result.append(obj)
+            # Remove apps que não estão mais instalados
+            device.monitored_apps.exclude(package_name__in=seen_packages).delete()
             return Response(
-                MonitoredAppSerializer(created, many=True).data,
-                status=status.HTTP_201_CREATED,
+                MonitoredAppSerializer(result, many=True).data,
+                status=status.HTTP_200_OK,
             )
+
         # Single app
         serializer = MonitoredAppSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
