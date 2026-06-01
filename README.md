@@ -1,5 +1,7 @@
 # Aura — Proteção Digital Parental com IA
 
+> 🥉 **3° lugar — Hackathon Hacker Hero 2026** · Trilha: Detecção e Monitoramento Inteligente · Equipe Pitaia
+
 > App de monitoramento parental focado em jogos. A IA classifica capturas de tela em tempo real e o responsável recebe apenas um alerta textual. Nenhuma imagem é armazenada ou transmitida ao pai.
 
 **Equipe Pitaia — Hacker Hero 2026**
