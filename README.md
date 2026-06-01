@@ -587,9 +587,12 @@ aura/
 
 ## Equipe Pitaia
 
-- **Henrique Cunha**
-- **Namem Rachid**
-- **Beatriz Dutra**
+| | |
+|---|---|
+| [@Namem](https://github.com/Namem) | Namem Rachid |
+| [@henrltop](https://github.com/henrltop) | Henrique Cunha |
+| [@BeatrizSchuindt](https://github.com/BeatrizSchuindt) | Ana Beatriz Schuindt |
+| [@biahduttra29](https://github.com/biahduttra29) | Beatriz Dutra |
 
 Hackathon Hacker Hero 2026 — Trilha Detecção e Monitoramento Inteligente.
 
